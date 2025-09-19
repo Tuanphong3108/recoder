@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Playback</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="playback" class="playback">
+    <header>
+      <a href="index.html">← Trở về</a>
+      <h2 id="playbackTitle">Playback</h2>
+    </header>
+    <main>
+      <canvas id="playbackWave" width="800" height="200"></canvas>
+      <div id="playbackTime">00:00 / 00:00</div>
+      <input type="range" id="seekbar" min="0" max="100" value="0">
+      <div class="playback-controls">
+        <button id="rewindBtn">⏪</button>
+        <button id="playPauseBtn">▶</button>
+        <button id="forwardBtn">⏩</button>
+      </div>
+      <div class="playback-extra">
+        <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+        <button id="speedBtn">1x</button>
+      </div>
+    </main>
+    <script src="playback.js"></script>
+  </div>
+</body>
+</html>
