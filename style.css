@@ -66,3 +66,132 @@ select#micList{background:var(--panel);border:0;color:#e6f7ee;padding:8px;border
 .modal-card{background:var(--panel);padding:16px;border-radius:12px;min-width:280px;color:#e9f8ea}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 .muted{color:var(--muted);font-size:0.9rem;margin-top:6px}
+
+/* Playback screen */
+.playback {
+  background: #0b0d09;
+  color: #e0f2e9;
+  font-family: "Segoe UI", sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.playback header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #131613;
+  border-bottom: 1px solid #1f2a1f;
+}
+
+.playback header a {
+  color: #9f9;
+  text-decoration: none;
+  margin-right: 1rem;
+  font-size: 1.2rem;
+}
+
+.playback header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: normal;
+}
+
+.playback main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+#playbackWave {
+  width: 90%;
+  max-width: 900px;
+  height: 180px;
+  background: #0f120f;
+  border-radius: 10px;
+  box-shadow: inset 0 0 8px #050;
+}
+
+#playbackTime {
+  font-size: 0.9rem;
+  color: #b5cdb5;
+}
+
+#seekbar {
+  width: 80%;
+  accent-color: #9f9;
+  cursor: pointer;
+}
+
+.playback-controls {
+  display: flex;
+  gap: 1rem;
+}
+
+.playback-controls button {
+  background: #1e241e;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  color: #e0f2e9;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.playback-controls button:hover {
+  background: #2d3b2d;
+}
+
+.playback-extra {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+#volume {
+  accent-color: #9f9;
+  cursor: pointer;
+}
+
+#speedBtn {
+  background: #1e241e;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #e0f2e9;
+  transition: background 0.2s;
+}
+#speedBtn:hover {
+  background: #2d3b2d;
+}
+
+/* Animation fade-in */
+.playback {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.playback {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.playback.show {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
