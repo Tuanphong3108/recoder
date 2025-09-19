@@ -1,4 +1,17 @@
 // script.js (đã fix phân biệt Start/Resume – Pause – Stop)
+// --- Splash ---
+async function initSplash() {
+  try {
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (e) {
+    console.warn("Mic access denied:", e);
+  }
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+  }, 2000);
+}
+initSplash();
 
 // --- IndexedDB helper ---
 const DB_NAME = 'recorder-clone-db-v1';
