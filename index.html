@@ -1,23 +1,96 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Recorder</title>
   <link rel="stylesheet" href="style.css"/>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#112017"/>
 </head>
 <body>
   <div class="app">
-    <h1>Recorder</h1>
-    <div class="controls">
-      <button id="startBtn">Start Recording</button>
-      <button id="stopBtn" disabled>Stop</button>
+    <!-- Header -->
+    <header class="topbar">
+      <div class="title">Recorder</div>
+      <div class="actions">
+        <button id="btnSettings" class="icon-btn">⚙️</button>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+      <!-- Left: Recorder screen -->
+      <section class="recorder-screen">
+        <div class="illustration" id="illustration">
+          <!-- placeholder illustration -->
+          <img src="icons/illustration.svg" alt="illustration" onerror="this.style.display='none'"/>
+        </div>
+
+        <div class="status" id="statusText">Nhấn nút đỏ để bắt đầu</div>
+        <div class="timer" id="timer">00:00.0</div>
+
+        <div class="wave-wrap">
+          <canvas id="waveCanvas"></canvas>
+        </div>
+
+        <div class="controls">
+          <div class="mic-select">
+            <button id="btnMic" class="icon-btn">🎤</button>
+            <select id="micList" title="Chọn micro"></select>
+          </div>
+
+          <div class="record-controls">
+            <button id="btnRecord" class="record-btn">⏺</button>
+            <button id="btnPause" class="small-btn" disabled>⏸</button>
+            <button id="btnStop" class="small-btn" disabled>■</button>
+          </div>
+
+          <div class="extra-btns">
+            <button id="btnClear" class="small-btn" title="Xóa bản ghi tạm">🗑️</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: List -->
+      <aside class="list-screen">
+        <h3>Bản ghi âm</h3>
+        <div id="recordingsList" class="recordings-list">
+          <!-- items injected here -->
+        </div>
+      </aside>
+    </main>
+
+    <!-- Info modal -->
+    <div id="modal" class="modal hidden">
+      <div class="modal-card">
+        <h4>Thông tin bản ghi</h4>
+        <div id="modalContent"></div>
+        <div class="modal-actions">
+          <button id="modalDownload" class="small-btn">⬇️ Tải</button>
+          <button id="modalDelete" class="small-btn danger">🗑️ Xóa</button>
+          <button id="modalClose" class="small-btn">Đóng</button>
+        </div>
+      </div>
     </div>
-    <div class="recordings">
-      <h2>My Recordings</h2>
-      <ul id="recordingsList"></ul>
+
+    <!-- Settings modal -->
+    <div id="settings" class="modal hidden">
+      <div class="modal-card">
+        <h4>Cài đặt</h4>
+        <label>
+          <input type="checkbox" id="autoSave" checked /> Tự lưu sau khi dừng
+        </label>
+        <p class="muted">Note: Web Speech API (transcript) yêu cầu HTTPS/localhost và trình duyệt hỗ trợ.</p>
+        <div class="modal-actions">
+          <button id="settingsClose" class="small-btn">Đóng</button>
+        </div>
+      </div>
     </div>
+
+    <footer class="footer">Chạy tốt trên Chrome/Edge. Yêu cầu HTTPS hoặc localhost để truy cập microphone / Web Speech API.</footer>
   </div>
-  <script src="script.js"></script>
+
+  <script src="script.js" type="module"></script>
 </body>
 </html>
