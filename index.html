@@ -9,7 +9,12 @@
   <meta name="theme-color" content="#112017"/>
 </head>
 <body>
-  <div class="app">
+  <!-- Splash -->
+  <div id="splash" class="splash">
+    <img src="icons/icon.png" alt="Recoder Logo"/>
+  </div>
+
+  <div class="app hidden" id="app">
     <!-- Header -->
     <header class="topbar">
       <div class="title">Recorder</div>
@@ -23,7 +28,6 @@
       <!-- Left: Recorder screen -->
       <section class="recorder-screen">
         <div class="illustration" id="illustration">
-          <!-- placeholder illustration -->
           <img src="icons/illustration.svg" alt="illustration" onerror="this.style.display='none'"/>
         </div>
 
@@ -55,9 +59,7 @@
       <!-- Right: List -->
       <aside class="list-screen">
         <h3>Bản ghi âm</h3>
-        <div id="recordingsList" class="recordings-list">
-          <!-- items injected here -->
-        </div>
+        <div id="recordingsList" class="recordings-list"></div>
       </aside>
     </main>
 
@@ -81,14 +83,14 @@
         <label>
           <input type="checkbox" id="autoSave" checked /> Tự lưu sau khi dừng
         </label>
-        <p class="muted">Note: Web Speech API (transcript) yêu cầu HTTPS/localhost và trình duyệt hỗ trợ.</p>
+        <p class="muted">Note: Web Speech API (transcript) yêu cầu HTTPS/localhost.</p>
         <div class="modal-actions">
           <button id="settingsClose" class="small-btn">Đóng</button>
         </div>
       </div>
     </div>
 
-    <footer class="footer">Chạy tốt trên Chrome/Edge. Yêu cầu HTTPS hoặc localhost để truy cập microphone / Web Speech API.</footer>
+    <footer class="footer">Chạy tốt trên Chrome/Edge. Yêu cầu HTTPS hoặc localhost để truy cập microphone.</footer>
   </div>
 
   <script src="script.js" type="module"></script>
