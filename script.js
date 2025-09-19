@@ -1,8 +1,9 @@
-// script.js (module)
+// script.js (đã fix phân biệt Start/Resume – Pause – Stop)
+
+// --- IndexedDB helper ---
 const DB_NAME = 'recorder-clone-db-v1';
 const STORE = 'recordings';
 
-// --- IndexedDB helper ---
 function openDB() {
   return new Promise((res, rej) => {
     const rq = indexedDB.open(DB_NAME, 1);
@@ -44,7 +45,7 @@ async function getAllRecordings() {
   });
 }
 
-// --- DOM ---
+// --- DOM refs ---
 const micList = document.getElementById('micList');
 const btnMic = document.getElementById('btnMic');
 const btnRecord = document.getElementById('btnRecord');
@@ -63,10 +64,10 @@ const settings = document.getElementById('settings');
 const btnSettings = document.getElementById('btnSettings');
 const settingsClose = document.getElementById('settingsClose');
 const autoSaveCheckbox = document.getElementById('autoSave');
-
 const waveCanvas = document.getElementById('waveCanvas');
 const canvasCtx = waveCanvas.getContext('2d');
 
+// --- state ---
 let audioCtx, analyser, dataArray, sourceNode;
 let mediaRecorder = null;
 let currentStream = null;
@@ -74,7 +75,6 @@ let chunks = [];
 let startTS = 0;
 let accumulated = 0;
 let tickRAF = null;
-let currentRecordingMeta = null;
 
 // --- utilities ---
 function fmtTime(s){
@@ -112,7 +112,7 @@ async function refreshMics(){
     console.warn('refreshMics', e);
   }
 }
-navigator.mediaDevices && navigator.mediaDevices.addEventListener && navigator.mediaDevices.addEventListener('devicechange', refreshMics);
+navigator.mediaDevices?.addEventListener?.('devicechange', refreshMics);
 
 // --- visualizer ---
 function resizeCanvas(){
@@ -154,15 +154,13 @@ async function startRecording(){
     sourceNode = audioCtx.createMediaStreamSource(stream);
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 2048;
-    const bufferLen = analyser.fftSize;
-    dataArray = new Uint8Array(bufferLen);
+    dataArray = new Uint8Array(analyser.fftSize);
     sourceNode.connect(analyser);
 
     drawWave();
 
     chunks = [];
-    const options = { mimeType: 'audio/webm;codecs=opus' };
-    mediaRecorder = new MediaRecorder(stream, options);
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
     mediaRecorder.ondataavailable = e => { if(e.data && e.data.size>0) chunks.push(e.data); };
     mediaRecorder.onstart = () => {
       startTS = performance.now();
@@ -175,9 +173,11 @@ async function startRecording(){
     };
     mediaRecorder.onpause = () => {
       accumulated += (performance.now() - startTS)/1000;
+      statusText.textContent = 'Tạm dừng';
     };
     mediaRecorder.onresume = () => {
       startTS = performance.now();
+      statusText.textContent = 'Đang ghi...';
     };
     mediaRecorder.onstop = async () => {
       cancelAnimationFrame(tickRAF);
@@ -186,54 +186,45 @@ async function startRecording(){
       btnPause.disabled = true;
       btnStop.disabled = true;
       btnRecord.classList.remove('recording');
-      // make blob & meta
       const blob = new Blob(chunks, { type: chunks[0]?.type || 'audio/webm' });
       const duration = accumulated + ((performance.now() - startTS)/1000);
       const meta = {
         id: 'r_' + Date.now(),
         name: `Recording ${new Date().toLocaleString()}`,
         created: Date.now(),
-        duration: duration,
+        duration,
         size: blob.size,
         mime: blob.type,
         blob
       };
-      if(document.getElementById('autoSave').checked){
+      if(autoSaveCheckbox.checked){
         await saveRecording(meta);
         refreshList();
-      } else {
-        // if not auto save, still add to list as temp record
-        await saveRecording(meta); // we still save — simpler UX (you can delete)
-        refreshList();
       }
-      // stop tracks
       try{ currentStream.getTracks().forEach(t=>t.stop()); }catch(e){}
     };
 
     mediaRecorder.start();
   }catch(err){
     console.error('startRecording', err);
-    alert('Không thể truy cập micro. Kiểm tra quyền và HTTPS/localhost.');
+    alert('Không thể truy cập micro: ' + (err.message||err));
   }
 }
 function pauseRecording(){
   if(mediaRecorder && mediaRecorder.state === 'recording'){
     mediaRecorder.pause();
-    statusText.textContent = 'Tạm dừng';
   }
 }
 function resumeRecording(){
   if(mediaRecorder && mediaRecorder.state === 'paused'){
     mediaRecorder.resume();
-    statusText.textContent = 'Đang ghi...';
   }
 }
 function stopRecording(){
-  if(mediaRecorder && (mediaRecorder.state === 'recording' || mediaRecorder.state === 'paused')){
+  if(mediaRecorder && (mediaRecorder.state==='recording' || mediaRecorder.state==='paused')){
     mediaRecorder.stop();
   }
 }
-
 function tickTimer(){
   function tick(){
     if(!mediaRecorder) return;
@@ -248,7 +239,7 @@ function tickTimer(){
   tick();
 }
 
-// --- UI list & actions ---
+// --- list & modal (y như gốc) ---
 async function refreshList(){
   recordingsList.innerHTML = '';
   const recs = await getAllRecordings();
@@ -258,79 +249,55 @@ async function refreshList(){
     el.className = 'record-item';
     const left = document.createElement('div'); left.className = 'rec-left';
     const name = document.createElement('div'); name.className = 'rec-name'; name.textContent = rec.name;
-    const meta = document.createElement('div'); meta.className = 'rec-meta'; meta.textContent = `${new Date(rec.created).toLocaleString()} • ${fmtTime(rec.duration || 0)} • ${formatBytes(rec.size)}`;
+    const meta = document.createElement('div'); meta.className = 'rec-meta'; meta.textContent = `${new Date(rec.created).toLocaleString()} • ${fmtTime(rec.duration||0)} • ${formatBytes(rec.size)}`;
     left.appendChild(name); left.appendChild(meta);
     const actions = document.createElement('div'); actions.className = 'rec-actions';
-    const btnPlay = document.createElement('button'); btnPlay.textContent = '▶'; btnPlay.title = 'Phát';
-    btnPlay.onclick = () => {
-      const url = URL.createObjectURL(rec.blob);
-      const a = new Audio(url); a.play();
-    };
-    const btnExport = document.createElement('button'); btnExport.textContent = '⬇'; btnExport.title = 'Tải xuống';
-    btnExport.onclick = () => {
-      const url = URL.createObjectURL(rec.blob);
-      const a = document.createElement('a'); a.href = url;
-      const ext = rec.mime && rec.mime.indexOf('wav')!==-1 ? 'wav':'webm';
-      a.download = `${rec.name.replace(/[^a-z0-9\\-_\\.]/ig,'_')}.${ext}`;
-      a.click();
-    };
-    const btnInfo = document.createElement('button'); btnInfo.textContent = 'ℹ️'; btnInfo.title = 'Thông tin';
-    btnInfo.onclick = () => openModal(rec);
-    actions.appendChild(btnPlay); actions.appendChild(btnExport); actions.appendChild(btnInfo);
-    el.appendChild(left); el.appendChild(actions);
+    const btnPlay = document.createElement('button'); btnPlay.textContent = '▶'; btnPlay.onclick = () => { new Audio(URL.createObjectURL(rec.blob)).play(); };
+    const btnExport = document.createElement('button'); btnExport.textContent = '⬇'; btnExport.onclick = () => { const a=document.createElement('a'); a.href=URL.createObjectURL(rec.blob); a.download=`${rec.name.replace(/[^a-z0-9\\-_\\.]/ig,'_')}.webm`; a.click(); };
+    const btnInfo = document.createElement('button'); btnInfo.textContent = 'ℹ️'; btnInfo.onclick = () => openModal(rec);
+    actions.append(btnPlay, btnExport, btnInfo);
+    el.append(left, actions);
     recordingsList.appendChild(el);
   });
 }
-
-// --- modal for info ---
 let modalRec = null;
 function openModal(rec){
   modalRec = rec;
   modalContent.innerHTML = `
     <div><strong>Tên:</strong> ${rec.name}</div>
     <div><strong>Ngày tạo:</strong> ${new Date(rec.created).toLocaleString()}</div>
-    <div><strong>Thời lượng:</strong> ${fmtTime(rec.duration || 0)}</div>
+    <div><strong>Thời lượng:</strong> ${fmtTime(rec.duration||0)}</div>
     <div><strong>Kích thước:</strong> ${formatBytes(rec.size)}</div>
   `;
   modal.classList.remove('hidden');
-  modalDownload.onclick = () => {
-    const url = URL.createObjectURL(rec.blob);
-    const a = document.createElement('a'); a.href = url;
-    const ext = rec.mime && rec.mime.indexOf('wav')!==-1 ? 'wav':'webm';
-    a.download = `${rec.name.replace(/[^a-z0-9\\-_\\.]/ig,'_')}.${ext}`;
-    a.click();
-  };
-  modalDelete.onclick = async () => {
-    if(!confirm('Xác nhận xóa?')) return;
-    await deleteRecording(rec.id);
-    modal.classList.add('hidden');
-    refreshList();
-  };
+  modalDownload.onclick = () => { const a=document.createElement('a'); a.href=URL.createObjectURL(rec.blob); a.download=`${rec.name.replace(/[^a-z0-9\\-_\\.]/ig,'_')}.webm`; a.click(); };
+  modalDelete.onclick = async () => { if(!confirm('Xác nhận xóa?')) return; await deleteRecording(rec.id); modal.classList.add('hidden'); refreshList(); };
 }
 modalClose.onclick = () => modal.classList.add('hidden');
 
-// --- settings modal ---
+// --- settings ---
 btnSettings.onclick = () => settings.classList.remove('hidden');
 settingsClose.onclick = () => settings.classList.add('hidden');
 
-// --- wire buttons ---
+// --- buttons (FIXED) ---
 btnRecord.onclick = async () => {
-  if(!mediaRecorder || mediaRecorder.state === 'inactive'){
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') {
     await startRecording();
-  } else if(mediaRecorder.state === 'paused'){
+  } else if (mediaRecorder.state === 'paused') {
     resumeRecording();
-  } else if(mediaRecorder.state === 'recording'){
-    pauseRecording();
   }
 };
 btnPause.onclick = () => {
-  if(mediaRecorder && mediaRecorder.state === 'recording') pauseRecording();
-  else if(mediaRecorder && mediaRecorder.state === 'paused') resumeRecording();
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    pauseRecording();
+  }
 };
-btnStop.onclick = async () => stopRecording();
+btnStop.onclick = () => {
+  stopRecording();
+};
 btnMic.onclick = () => micList.focus();
 btnClear.onclick = async () => {
-  if(!confirm('Xóa tất cả bản ghi trong DB?')) return;
+  if(!confirm('Xóa tất cả bản ghi?')) return;
   const recs = await getAllRecordings();
   for(const r of recs) await deleteRecording(r.id);
   refreshList();
@@ -341,9 +308,7 @@ btnClear.onclick = async () => {
   if(!navigator.mediaDevices){ alert('Trình duyệt không hỗ trợ MediaDevices API'); return; }
   await refreshMics();
   await refreshList();
-
-  // register sw
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('service-worker.js').then(()=>console.log('SW registered')).catch(()=>{});
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
   }
 })();
