@@ -1,54 +1,54 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #f2f2f2;
-  color: #333;
   margin: 0;
-  padding: 20px;
+  font-family: "Arial", sans-serif;
+  background: #121a11; /* xanh đen kiểu ChromeOS */
+  color: #c8f7c5;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.app {
-  max-width: 600px;
-  margin: auto;
-  background: white;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-h1 {
+.screen {
   text-align: center;
+}
+
+.illustration {
+  margin-bottom: 40px;
+  color: #9acd8f;
+}
+
+.hint {
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: #cde9cd;
 }
 
 .controls {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 40px;
+  margin-bottom: 10px;
 }
 
-button {
-  padding: 10px 20px;
+.controls button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   border: none;
-  border-radius: 8px;
-  background: #0078d7;
-  color: white;
-  font-size: 16px;
+  background: #2a3529;
+  color: #fff;
+  font-size: 24px;
   cursor: pointer;
 }
 
-button:disabled {
-  background: #aaa;
-  cursor: not-allowed;
+#recordBtn {
+  background: #4b2d2d;
+  font-size: 28px;
+  color: red;
 }
 
-.recordings ul {
-  list-style: none;
-  padding: 0;
-}
-
-.recordings li {
-  margin: 10px 0;
-  background: #fafafa;
-  padding: 10px;
-  border-radius: 8px;
+.label {
+  font-size: 14px;
+  color: #bfbfbf;
 }
