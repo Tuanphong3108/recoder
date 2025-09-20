@@ -27,6 +27,15 @@ function getRecording(id) {
   });
 }
 
+function deleteRecording(id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    tx.objectStore(STORE_NAME).delete(id);
+    tx.oncomplete = resolve;
+    tx.onerror = reject;
+  });
+}
+
 // ================== Playback UI ==================
 async function initPlayback() {
   await openDB();
@@ -125,6 +134,48 @@ async function initPlayback() {
     requestAnimationFrame(drawWave);
   }
   drawWave();
+
+  // ================== Menu actions ==================
+  const menuBtn = document.getElementById("menuBtn");
+  const menu = document.getElementById("menu");
+  menuBtn.onclick = () => { menu.classList.toggle("hidden"); };
+
+  // Export
+  document.getElementById("exportBtn").onclick = () => {
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = rec.name.replace(/[^a-z0-9]/gi, "_") + ".webm";
+    a.click();
+    menu.classList.add("hidden");
+  };
+
+  // Delete
+  document.getElementById("deleteBtn").onclick = async () => {
+    await deleteRecording(rec.id);
+    window.location.href = "index.html";
+  };
+
+  // Info
+  const infoModal = document.getElementById("infoModal");
+  const infoContent = document.getElementById("infoContent");
+  document.getElementById("infoBtn").onclick = () => {
+    const sizeKB = (rec.blob.size / 1024).toFixed(1);
+    const tmpAudio = new Audio(blobUrl);
+    tmpAudio.onloadedmetadata = () => {
+      const dur = tmpAudio.duration.toFixed(1);
+      infoContent.innerHTML = `
+        <p><b>Tên:</b> ${rec.name}</p>
+        <p><b>Kích thước:</b> ${sizeKB} KB</p>
+        <p><b>Thời lượng:</b> ${dur} giây</p>
+        <p><b>ID:</b> ${rec.id}</p>
+      `;
+      infoModal.classList.remove("hidden");
+    };
+    menu.classList.add("hidden");
+  };
+  document.getElementById("closeInfo").onclick = () => {
+    infoModal.classList.add("hidden");
+  };
 }
 
 initPlayback();
