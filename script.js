@@ -2,10 +2,9 @@
 async function initSplash() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    // Tắt stream ngay sau khi xin quyền để giải phóng mic
+    // stop test stream ngay sau khi xin quyền
     stream.getTracks().forEach(track => track.stop());
 
-    // Ẩn splash, hiện app
     document.getElementById("splash").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
   } catch (e) {
@@ -15,7 +14,11 @@ async function initSplash() {
     document.getElementById("app").classList.remove("hidden");
   }
 }
-initSplash();
+
+window.onload = () => {
+  initSplash();
+  init(); // gọi khởi tạo DB sau khi DOM ready
+};
 
 // ================== IndexedDB ==================
 let db;
@@ -48,8 +51,7 @@ function saveRecording(id, name, blob) {
 function getAllRecordings() {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readonly");
-    const store = tx.objectStore(STORE_NAME);
-    const req = store.getAll();
+    const req = tx.objectStore(STORE_NAME).getAll();
     req.onsuccess = () => resolve(req.result);
     req.onerror = reject;
   });
@@ -76,7 +78,6 @@ const timerEl = document.getElementById("timer");
 
 btnRecord.onclick = async () => {
   if (mediaRecorder && mediaRecorder.state === "recording") {
-    // Đang ghi → dừng
     mediaRecorder.stop();
     btnRecord.textContent = "⏺";
     btnPause.disabled = true;
@@ -106,14 +107,13 @@ btnRecord.onclick = async () => {
       btnPause.disabled = false;
       btnStop.disabled = false;
 
-      // start timer
       startTime = Date.now();
       timerInterval = setInterval(() => {
         const diff = Date.now() - startTime;
         const secs = diff / 1000;
         const m = String(Math.floor(secs / 60)).padStart(2, "0");
-        const s = (secs % 60).toFixed(1).padStart(4, "0");
-        timerEl.textContent = `${m}:${s}`;
+        const s = (secs % 60).toFixed(1);
+        timerEl.textContent = `${m}:${s.padStart(4, "0")}`;
       }, 100);
 
     } catch (err) {
@@ -164,4 +164,3 @@ async function init() {
   await openDB();
   refreshList();
 }
-init();
