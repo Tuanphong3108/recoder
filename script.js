@@ -2,10 +2,10 @@
 async function initSplash() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    // tắt stream ngay sau khi test quyền
+    // Tắt stream ngay sau khi xin quyền để giải phóng mic
     stream.getTracks().forEach(track => track.stop());
 
-    // Ẩn splash, show app
+    // Ẩn splash, hiện app
     document.getElementById("splash").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
   } catch (e) {
@@ -15,7 +15,6 @@ async function initSplash() {
     document.getElementById("app").classList.remove("hidden");
   }
 }
-
 initSplash();
 
 // ================== IndexedDB ==================
@@ -77,7 +76,7 @@ const timerEl = document.getElementById("timer");
 
 btnRecord.onclick = async () => {
   if (mediaRecorder && mediaRecorder.state === "recording") {
-    // đang ghi → stop
+    // Đang ghi → dừng
     mediaRecorder.stop();
     btnRecord.textContent = "⏺";
     btnPause.disabled = true;
