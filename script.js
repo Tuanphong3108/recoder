@@ -1,18 +1,21 @@
 // ================== Splash Screen ==================
 async function initSplash() {
   try {
-    await navigator.mediaDevices.getUserMedia({ audio: true });
-    // Có quyền mic → ẩn splash ngay
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // tắt stream ngay sau khi test quyền
+    stream.getTracks().forEach(track => track.stop());
+
+    // Ẩn splash, show app
     document.getElementById("splash").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
   } catch (e) {
     console.warn("Mic access denied:", e);
     alert("Ứng dụng cần quyền microphone để ghi âm!");
-    // Vẫn ẩn splash nếu bị từ chối
     document.getElementById("splash").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
   }
 }
+
 initSplash();
 
 // ================== IndexedDB ==================
