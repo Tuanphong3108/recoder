@@ -176,6 +176,13 @@ async function initPlayback() {
   document.getElementById("closeInfo").onclick = () => {
     infoModal.classList.add("hidden");
   };
+
+  // ================== Auto play khi load ==================
+  audio.onloadedmetadata = () => {
+    audio.play();
+    audioCtx.resume();
+    playPauseBtn.textContent = "⏸";
+  };
 }
 
 initPlayback();
