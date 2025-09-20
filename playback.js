@@ -1,32 +1,22 @@
-// ================= IndexedDB helpers ==================
+let db;
 const DB_NAME = "recorder-db";
 const STORE_NAME = "recordings";
-let db;
 
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = (e) => {
-      db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: "id" });
-      }
-    };
-    req.onsuccess = (e) => { db = e.target.result; resolve(); };
-    req.onerror = (e) => reject(e);
+    req.onsuccess = e => { db = e.target.result; resolve(); };
+    req.onerror = reject;
   });
 }
-
 function getRecording(id) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readonly");
-    const store = tx.objectStore(STORE_NAME);
-    const req = store.get(id);
+    const req = tx.objectStore(STORE_NAME).get(id);
     req.onsuccess = () => resolve(req.result);
     req.onerror = reject;
   });
 }
-
 function deleteRecording(id) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
@@ -36,153 +26,146 @@ function deleteRecording(id) {
   });
 }
 
-// ================== Playback UI ==================
-async function initPlayback() {
-  await openDB();
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get("id");
+// Elements
+const audio = new Audio();
+const playBtn = document.getElementById("btnPlay");
+const backBtn = document.getElementById("btnBack");
+const forwardBtn = document.getElementById("btnForward");
+const seek = document.getElementById("seek");
+const volume = document.getElementById("volume");
+const speedBtn = document.getElementById("speed");
+const timeEl = document.getElementById("playbackTime");
+const recNameEl = document.getElementById("recName");
+const menuBtn = document.getElementById("menuBtn");
+const menu = document.getElementById("menu");
+const infoBtn = document.getElementById("infoBtn");
+const exportBtn = document.getElementById("exportBtn");
+const deleteBtn = document.getElementById("deleteBtn");
+const infoModal = document.getElementById("infoModal");
+const infoContent = document.getElementById("infoContent");
+const closeInfo = document.getElementById("closeInfo");
+const canvas = document.getElementById("waveform");
+const ctx = canvas.getContext("2d");
 
-  const rec = await getRecording(id);
+let rec, recId, blobUrl;
+
+// URL param
+const params = new URLSearchParams(location.search);
+recId = params.get("id");
+
+// Menu toggle
+menuBtn.onclick = () => menu.classList.toggle("hidden");
+window.onclick = (e) => {
+  if (e.target !== menuBtn && !menu.contains(e.target)) {
+    menu.classList.add("hidden");
+  }
+};
+
+// Init
+async function init() {
+  await openDB();
+  rec = await getRecording(recId);
   if (!rec) {
-    document.body.innerHTML = "<h1>Không tìm thấy bản ghi</h1>";
+    alert("Không tìm thấy bản ghi!");
+    location.href = "index.html";
     return;
   }
+  recNameEl.textContent = rec.name;
 
-  document.getElementById("playbackTitle").textContent = rec.name;
+  const blob = rec.blob;
+  blobUrl = URL.createObjectURL(blob);
+  audio.src = blobUrl;
 
-  const blobUrl = URL.createObjectURL(rec.blob);
-  const audio = new Audio(blobUrl);
+  // Auto play
+  audio.play();
 
-  const canvas = document.getElementById("playbackWave");
-  const ctx = canvas.getContext("2d");
-  const seekbar = document.getElementById("seekbar");
-  const time = document.getElementById("playbackTime");
-
-  const playPauseBtn = document.getElementById("playPauseBtn");
-  const rewindBtn = document.getElementById("rewindBtn");
-  const forwardBtn = document.getElementById("forwardBtn");
-  const volume = document.getElementById("volume");
-  const speedBtn = document.getElementById("speedBtn");
-
-  // audio context + waveform
-  const audioCtx = new AudioContext();
-  const srcNode = audioCtx.createMediaElementSource(audio);
-  const analyser = audioCtx.createAnalyser();
-  analyser.fftSize = 2048;
-  const dataArr = new Uint8Array(analyser.fftSize);
-
-  srcNode.connect(analyser);
-  analyser.connect(audioCtx.destination);
-
-  function fmtTime(sec) {
-    sec = Math.floor(sec);
-    return String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0");
-  }
-
-  audio.ontimeupdate = () => {
-    if (!isNaN(audio.duration)) {
-      seekbar.value = (audio.currentTime / audio.duration) * 100 || 0;
-      time.textContent = `${fmtTime(audio.currentTime)} / ${fmtTime(audio.duration)}`;
-    }
-  };
-
-  seekbar.oninput = () => {
-    if (!isNaN(audio.duration)) {
-      audio.currentTime = (seekbar.value / 100) * audio.duration;
-    }
-  };
-
-  playPauseBtn.onclick = () => {
-    if (audio.paused) {
-      audio.play();
-      audioCtx.resume();
-      playPauseBtn.textContent = "⏸";
-    } else {
-      audio.pause();
-      playPauseBtn.textContent = "▶";
-    }
-  };
-
-  rewindBtn.onclick = () => { audio.currentTime = Math.max(0, audio.currentTime - 5); };
-  forwardBtn.onclick = () => { audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); };
-
-  volume.oninput = () => { audio.volume = volume.value; };
-
-  let speeds = [1, 1.25, 1.5, 2];
-  let idx = 0;
-  speedBtn.onclick = () => {
-    idx = (idx + 1) % speeds.length;
-    audio.playbackRate = speeds[idx];
-    speedBtn.textContent = speeds[idx] + "x";
-  };
-
-  function drawWave() {
-    analyser.getByteTimeDomainData(dataArr);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath();
-    ctx.strokeStyle = "#9f9";
-    let slice = canvas.width / dataArr.length;
-    let x = 0;
-    for (let i = 0; i < dataArr.length; i++) {
-      let v = dataArr[i] / 128.0;
-      let y = (v * canvas.height) / 2;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-      x += slice;
-    }
-    ctx.stroke();
-    requestAnimationFrame(drawWave);
-  }
-  drawWave();
-
-  // ================== Menu actions ==================
-  const menuBtn = document.getElementById("menuBtn");
-  const menu = document.getElementById("menu");
-  menuBtn.onclick = () => { menu.classList.toggle("hidden"); };
-
-  // Export
-  document.getElementById("exportBtn").onclick = () => {
-    const a = document.createElement("a");
-    a.href = blobUrl;
-    a.download = rec.name.replace(/[^a-z0-9]/gi, "_") + ".webm";
-    a.click();
-    menu.classList.add("hidden");
-  };
-
-  // Delete
-  document.getElementById("deleteBtn").onclick = async () => {
-    await deleteRecording(rec.id);
-    window.location.href = "index.html";
-  };
-
-  // Info
-  const infoModal = document.getElementById("infoModal");
-  const infoContent = document.getElementById("infoContent");
-  document.getElementById("infoBtn").onclick = () => {
-    const sizeKB = (rec.blob.size / 1024).toFixed(1);
-    const tmpAudio = new Audio(blobUrl);
-    tmpAudio.onloadedmetadata = () => {
-      const dur = tmpAudio.duration.toFixed(1);
-      infoContent.innerHTML = `
-        <p><b>Tên:</b> ${rec.name}</p>
-        <p><b>Kích thước:</b> ${sizeKB} KB</p>
-        <p><b>Thời lượng:</b> ${dur} giây</p>
-        <p><b>ID:</b> ${rec.id}</p>
-      `;
-      infoModal.classList.remove("hidden");
-    };
-    menu.classList.add("hidden");
-  };
-  document.getElementById("closeInfo").onclick = () => {
-    infoModal.classList.add("hidden");
-  };
-
-  // ================== Auto play khi load ==================
+  // update seek & time
   audio.onloadedmetadata = () => {
-    audio.play();
-    audioCtx.resume();
-    playPauseBtn.textContent = "⏸";
+    seek.max = audio.duration;
+    updateTime();
+  };
+  audio.ontimeupdate = () => {
+    seek.value = audio.currentTime;
+    updateTime();
+    drawWaveform();
   };
 }
+init();
 
-initPlayback();
+// Controls
+playBtn.onclick = () => {
+  if (audio.paused) {
+    audio.play();
+    playBtn.textContent = "⏸";
+  } else {
+    audio.pause();
+    playBtn.textContent = "▶";
+  }
+};
+backBtn.onclick = () => audio.currentTime = Math.max(0, audio.currentTime - 5);
+forwardBtn.onclick = () => audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
+seek.oninput = () => audio.currentTime = seek.value;
+volume.oninput = () => audio.volume = volume.value;
+speedBtn.onclick = () => {
+  const speeds = [1, 1.25, 1.5, 2];
+  let idx = speeds.indexOf(audio.playbackRate);
+  audio.playbackRate = speeds[(idx + 1) % speeds.length];
+  speedBtn.textContent = audio.playbackRate + "x";
+};
+
+// Time format
+function updateTime() {
+  const cur = formatTime(audio.currentTime);
+  const total = formatTime(audio.duration);
+  timeEl.textContent = `${cur} / ${total}`;
+}
+function formatTime(sec) {
+  if (isNaN(sec)) return "00:00";
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+// Waveform
+function drawWaveform() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "#d0bcff";
+  ctx.beginPath();
+  const mid = canvas.height / 2;
+  const len = 100;
+  const step = canvas.width / len;
+  for (let i = 0; i < len; i++) {
+    const h = Math.sin((audio.currentTime + i / 10)) * 20;
+    ctx.moveTo(i * step, mid - h);
+    ctx.lineTo(i * step, mid + h);
+  }
+  ctx.stroke();
+}
+
+// Menu actions
+infoBtn.onclick = () => {
+  const sizeKB = Math.round(rec.blob.size / 1024);
+  const dur = formatTime(audio.duration);
+  infoContent.innerHTML = `
+    <p><b>Tên:</b> ${rec.name}</p>
+    <p><b>Thời lượng:</b> ${dur}</p>
+    <p><b>Kích thước:</b> ${sizeKB} KB</p>
+    <p><b>ID:</b> ${rec.id}</p>
+  `;
+  infoModal.classList.remove("hidden");
+};
+closeInfo.onclick = () => infoModal.classList.add("hidden");
+
+exportBtn.onclick = () => {
+  const a = document.createElement("a");
+  a.href = blobUrl;
+  a.download = rec.name.replace(/\s+/g, "_") + ".webm";
+  a.click();
+};
+
+deleteBtn.onclick = async () => {
+  if (confirm("Xóa bản ghi này?")) {
+    await deleteRecording(rec.id);
+    location.href = "index.html";
+  }
+};
