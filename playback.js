@@ -1,4 +1,4 @@
-// ================== IndexedDB helpers ==================
+// ================= IndexedDB helpers ==================
 const DB_NAME = "recorder-db";
 const STORE_NAME = "recordings";
 let db;
