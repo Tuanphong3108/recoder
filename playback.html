@@ -8,6 +8,26 @@
 <body onload="document.getElementById('playback').classList.add('show')">
   <div id="playback" class="playback">
     <header>
+  <a href="index.html">← Trở về</a>
+  <h2 id="playbackTitle">Playback</h2>
+  <button id="menuBtn">⋮</button>
+  <div id="menu" class="menu hidden">
+    <button id="infoBtn">ℹ️ Thông tin</button>
+    <button id="exportBtn">⬇️ Xuất</button>
+    <button id="deleteBtn" class="danger">🗑️ Xoá</button>
+  </div>
+</header>
+
+<!-- Modal thông tin -->
+<div id="infoModal" class="modal hidden">
+  <div class="modal-card">
+    <h3>Thông tin bản ghi</h3>
+    <div id="infoContent"></div>
+    <button id="closeInfo">Đóng</button>
+  </div>
+</div>
+
+    <header>
       <a href="index.html">← Trở về</a>
       <h2 id="playbackTitle">Playback</h2>
     </header>
