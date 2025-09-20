@@ -2,19 +2,18 @@
 async function initSplash() {
   try {
     await navigator.mediaDevices.getUserMedia({ audio: true });
-    // có quyền -> ẩn ngay
+    // Có quyền mic → ẩn splash ngay
     document.getElementById("splash").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
   } catch (e) {
     console.warn("Mic access denied:", e);
     alert("Ứng dụng cần quyền microphone để ghi âm!");
-    // vẫn ẩn splash nếu bị từ chối
+    // Vẫn ẩn splash nếu bị từ chối
     document.getElementById("splash").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
   }
 }
 initSplash();
-
 
 // ================== IndexedDB ==================
 let db;
@@ -38,8 +37,7 @@ function openDB() {
 function saveRecording(id, name, blob) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    store.put({ id, name, blob });
+    tx.objectStore(STORE_NAME).put({ id, name, blob });
     tx.oncomplete = resolve;
     tx.onerror = reject;
   });
@@ -58,8 +56,7 @@ function getAllRecordings() {
 function deleteRecording(id) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    store.delete(id);
+    tx.objectStore(STORE_NAME).delete(id);
     tx.oncomplete = resolve;
     tx.onerror = reject;
   });
@@ -67,19 +64,23 @@ function deleteRecording(id) {
 
 // ================== Recorder ==================
 let mediaRecorder, chunks = [];
+let timerInterval, startTime;
 
 const btnRecord = document.getElementById("btnRecord");
 const btnPause = document.getElementById("btnPause");
 const btnStop = document.getElementById("btnStop");
 const recordingsList = document.getElementById("recordingsList");
+const timerEl = document.getElementById("timer");
 
 btnRecord.onclick = async () => {
   if (mediaRecorder && mediaRecorder.state === "recording") {
-    // đang ghi -> stop
+    // đang ghi → stop
     mediaRecorder.stop();
     btnRecord.textContent = "⏺";
     btnPause.disabled = true;
     btnStop.disabled = true;
+    clearInterval(timerInterval);
+    timerEl.textContent = "00:00.0";
   } else {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -94,12 +95,24 @@ btnRecord.onclick = async () => {
         const name = "Bản ghi lúc " + new Date().toLocaleString();
         await saveRecording(id, name, blob);
         refreshList();
+        clearInterval(timerInterval);
+        timerEl.textContent = "00:00.0";
       };
 
       mediaRecorder.start();
       btnRecord.textContent = "⏹";
       btnPause.disabled = false;
       btnStop.disabled = false;
+
+      // start timer
+      startTime = Date.now();
+      timerInterval = setInterval(() => {
+        const diff = Date.now() - startTime;
+        const secs = diff / 1000;
+        const m = String(Math.floor(secs / 60)).padStart(2, "0");
+        const s = (secs % 60).toFixed(1).padStart(4, "0");
+        timerEl.textContent = `${m}:${s}`;
+      }, 100);
 
     } catch (err) {
       alert("Không thể truy cập microphone: " + err);
