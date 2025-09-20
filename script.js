@@ -2,7 +2,6 @@
 async function initSplash() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    // stop test stream ngay sau khi xin quyền
     stream.getTracks().forEach(track => track.stop());
 
     document.getElementById("splash").classList.add("hidden");
@@ -17,7 +16,7 @@ async function initSplash() {
 
 window.onload = () => {
   initSplash();
-  init(); // gọi khởi tạo DB sau khi DOM ready
+  init(); // khởi tạo DB sau khi DOM ready
 };
 
 // ================== IndexedDB ==================
@@ -68,22 +67,22 @@ function deleteRecording(id) {
 
 // ================== Recorder ==================
 let mediaRecorder, chunks = [];
-let timerInterval, startTime;
+let timerInterval, startTime, elapsed = 0;
 
 const btnRecord = document.getElementById("btnRecord");
 const btnPause = document.getElementById("btnPause");
-const btnStop = document.getElementById("btnStop");
 const recordingsList = document.getElementById("recordingsList");
 const timerEl = document.getElementById("timer");
 
 btnRecord.onclick = async () => {
   if (mediaRecorder && mediaRecorder.state === "recording") {
+    // Stop ghi âm
     mediaRecorder.stop();
     btnRecord.textContent = "⏺";
     btnPause.disabled = true;
-    btnStop.disabled = true;
     clearInterval(timerInterval);
     timerEl.textContent = "00:00.0";
+    elapsed = 0;
   } else {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -100,21 +99,15 @@ btnRecord.onclick = async () => {
         refreshList();
         clearInterval(timerInterval);
         timerEl.textContent = "00:00.0";
+        elapsed = 0;
       };
 
       mediaRecorder.start();
       btnRecord.textContent = "⏹";
       btnPause.disabled = false;
-      btnStop.disabled = false;
 
       startTime = Date.now();
-      timerInterval = setInterval(() => {
-        const diff = Date.now() - startTime;
-        const secs = diff / 1000;
-        const m = String(Math.floor(secs / 60)).padStart(2, "0");
-        const s = (secs % 60).toFixed(1);
-        timerEl.textContent = `${m}:${s.padStart(4, "0")}`;
-      }, 100);
+      timerInterval = setInterval(updateTimer, 100);
 
     } catch (err) {
       alert("Không thể truy cập microphone: " + err);
@@ -124,20 +117,27 @@ btnRecord.onclick = async () => {
 
 btnPause.onclick = () => {
   if (!mediaRecorder) return;
+
   if (mediaRecorder.state === "recording") {
     mediaRecorder.pause();
     btnPause.textContent = "▶";
+    clearInterval(timerInterval);
+    elapsed += Date.now() - startTime;
   } else if (mediaRecorder.state === "paused") {
     mediaRecorder.resume();
     btnPause.textContent = "⏸";
+    startTime = Date.now();
+    timerInterval = setInterval(updateTimer, 100);
   }
 };
 
-btnStop.onclick = () => {
-  if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    mediaRecorder.stop();
-  }
-};
+function updateTimer() {
+  const diff = elapsed + (Date.now() - startTime);
+  const secs = diff / 1000;
+  const m = String(Math.floor(secs / 60)).padStart(2, "0");
+  const s = (secs % 60).toFixed(1).padStart(4, "0");
+  timerEl.textContent = `${m}:${s}`;
+}
 
 // ================== Render list ==================
 async function refreshList() {
