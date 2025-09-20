@@ -2,15 +2,19 @@
 async function initSplash() {
   try {
     await navigator.mediaDevices.getUserMedia({ audio: true });
+    // có quyền -> ẩn ngay
+    document.getElementById("splash").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
   } catch (e) {
     console.warn("Mic access denied:", e);
+    alert("Ứng dụng cần quyền microphone để ghi âm!");
+    // vẫn ẩn splash nếu bị từ chối
+    document.getElementById("splash").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
   }
-  setTimeout(() => {
-    document.getElementById('splash').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
-  }, 2000);
 }
 initSplash();
+
 
 // ================== IndexedDB ==================
 let db;
