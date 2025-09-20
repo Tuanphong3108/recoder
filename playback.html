@@ -7,32 +7,36 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <a href="index.html">← Trở về</a>
-    <h2 id="playbackTitle">Playback</h2>
-    <button id="menuBtn">⋮</button>
-    <div id="menu" class="menu hidden">
-      <button id="infoBtn">ℹ️ Thông tin</button>
-      <button id="exportBtn">⬇️ Xuất</button>
-      <button id="deleteBtn" class="danger">🗑️ Xoá</button>
-    </div>
-  </header>
+  <div id="app">
+    <header>
+      <a href="index.html">← Trở về</a>
+      <h2 id="recName">Playback</h2>
+      <button id="menuBtn">⋮</button>
+    </header>
 
-  <main>
-    <canvas id="playbackWave" width="600" height="100"></canvas>
+    <main>
+      <canvas id="waveform" height="120"></canvas>
+      <div id="playbackTime">00:00 / 00:00</div>
 
-    <div class="controls">
-      <button id="rewindBtn">⏪</button>
-      <button id="playPauseBtn">▶</button>
-      <button id="forwardBtn">⏩</button>
-      <input type="range" id="seekbar" min="0" max="100" value="0">
-      <span id="playbackTime">00:00 / 00:00</span>
-      <label>Âm lượng <input type="range" id="volume" min="0" max="1" step="0.01" value="1"></label>
-      <button id="speedBtn">1x</button>
-    </div>
-  </main>
+      <div class="controls">
+        <button id="btnBack">⏪</button>
+        <button id="btnPlay">▶</button>
+        <button id="btnForward">⏩</button>
+        <input type="range" id="seek" min="0" max="100" value="0">
+        <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+        <button id="speed">1x</button>
+      </div>
+    </main>
+  </div>
 
-  <!-- Modal thông tin -->
+  <!-- Menu 3 chấm -->
+  <div id="menu" class="hidden">
+    <button id="infoBtn">ℹ Thông tin</button>
+    <button id="exportBtn">⬇ Xuất</button>
+    <button id="deleteBtn" class="danger">🗑 Xóa</button>
+  </div>
+
+  <!-- Modal Info -->
   <div id="infoModal" class="modal hidden">
     <div class="modal-card">
       <h3>Thông tin bản ghi</h3>
