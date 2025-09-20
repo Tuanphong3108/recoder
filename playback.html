@@ -2,51 +2,45 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Playback</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recoder - Playback</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body onload="document.getElementById('playback').classList.add('show')">
-  <div id="playback" class="playback">
-    <header>
-  <a href="index.html">← Trở về</a>
-  <h2 id="playbackTitle">Playback</h2>
-  <button id="menuBtn">⋮</button>
-  <div id="menu" class="menu hidden">
-    <button id="infoBtn">ℹ️ Thông tin</button>
-    <button id="exportBtn">⬇️ Xuất</button>
-    <button id="deleteBtn" class="danger">🗑️ Xoá</button>
-  </div>
-</header>
+<body>
+  <header>
+    <a href="index.html">← Trở về</a>
+    <h2 id="playbackTitle">Playback</h2>
+    <button id="menuBtn">⋮</button>
+    <div id="menu" class="menu hidden">
+      <button id="infoBtn">ℹ️ Thông tin</button>
+      <button id="exportBtn">⬇️ Xuất</button>
+      <button id="deleteBtn" class="danger">🗑️ Xoá</button>
+    </div>
+  </header>
 
+  <main>
+    <canvas id="playbackWave" width="600" height="100"></canvas>
 
-<!-- Modal thông tin -->
-<div id="infoModal" class="modal hidden">
-  <div class="modal-card">
-    <h3>Thông tin bản ghi</h3>
-    <div id="infoContent"></div>
-    <button id="closeInfo">Đóng</button>
-  </div>
-</div>
-
-    <header>
-      <a href="index.html">← Trở về</a>
-      <h2 id="playbackTitle">Playback</h2>
-    </header>
-    <main>
-      <canvas id="playbackWave" width="800" height="200"></canvas>
-      <div id="playbackTime">00:00 / 00:00</div>
+    <div class="controls">
+      <button id="rewindBtn">⏪</button>
+      <button id="playPauseBtn">▶</button>
+      <button id="forwardBtn">⏩</button>
       <input type="range" id="seekbar" min="0" max="100" value="0">
-      <div class="playback-controls">
-        <button id="rewindBtn">⏪</button>
-        <button id="playPauseBtn">▶</button>
-        <button id="forwardBtn">⏩</button>
-      </div>
-      <div class="playback-extra">
-        <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
-        <button id="speedBtn">1x</button>
-      </div>
-    </main>
-    <script src="playback.js"></script>
+      <span id="playbackTime">00:00 / 00:00</span>
+      <label>Âm lượng <input type="range" id="volume" min="0" max="1" step="0.01" value="1"></label>
+      <button id="speedBtn">1x</button>
+    </div>
+  </main>
+
+  <!-- Modal thông tin -->
+  <div id="infoModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>Thông tin bản ghi</h3>
+      <div id="infoContent"></div>
+      <button id="closeInfo">Đóng</button>
+    </div>
   </div>
+
+  <script src="playback.js"></script>
 </body>
 </html>
