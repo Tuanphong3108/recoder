@@ -8,29 +8,29 @@
   <link rel="icon" type="image/png" href="icon.png" sizes="256x256">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1c1b1f">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet" />
 </head>
 <body>
-  <!-- Splash Screen -->
-  <div id="splash">
-    <img src="icon.png" alt="Recorder Logo" width="128" height="128">
-    <p>Đang khởi động...</p>
-  </div>
+  <div id="app">
+    <!-- Splash khi chờ quyền mic -->
+    <div id="splash">
+      <img src="icon.png" alt="Recorder Icon" width="96">
+      <p>Đang khởi động...</p>
+    </div>
 
-  <!-- App -->
-  <div id="app" class="hidden">
     <header>
       <h1>Recorder</h1>
+      <div class="header-actions">
+        <button id="recordBtn" class="material-symbols-rounded">mic</button>
+        <button id="stopBtn" class="material-symbols-rounded">stop</button>
+      </div>
     </header>
 
     <main>
-      <div id="controls">
-        <button id="btnRecord">⏺</button>
-        <button id="btnPause" disabled>⏸</button>
-        <span id="timer">00:00.0</span>
-      </div>
-
       <h2>Danh sách bản ghi</h2>
-      <div id="recordingsList"></div>
+      <div id="recordings" class="recordings-list">
+        <!-- Render bằng script.js -->
+      </div>
     </main>
   </div>
 
