@@ -26,7 +26,6 @@ function deleteRecording(id) {
   });
 }
 
-// Elements
 const audio = new Audio();
 const playBtn = document.getElementById("btnPlay");
 const backBtn = document.getElementById("btnBack");
@@ -50,11 +49,9 @@ const ctx = canvas.getContext("2d");
 
 let rec, recId, blobUrl;
 
-// URL param
 const params = new URLSearchParams(location.search);
 recId = params.get("id");
 
-// Menu toggle
 menuBtn.onclick = () => menu.classList.toggle("hidden");
 window.onclick = (e) => {
   if (e.target !== menuBtn && !menu.contains(e.target)) {
@@ -62,7 +59,6 @@ window.onclick = (e) => {
   }
 };
 
-// Init
 async function init() {
   await openDB();
   rec = await getRecording(recId);
@@ -77,11 +73,9 @@ async function init() {
   blobUrl = URL.createObjectURL(blob);
   audio.src = blobUrl;
 
-  // Auto play
   audio.play();
-  playBtn.textContent = "⏸";
+  playBtn.textContent = "pause";
 
-  // update seek & time
   audio.onloadedmetadata = () => {
     seek.max = audio.duration;
     updateTime();
@@ -94,29 +88,26 @@ async function init() {
 }
 init();
 
-// Controls
 playBtn.onclick = () => {
   if (audio.paused) {
     audio.play();
-    playBtn.textContent = "⏸";
+    playBtn.textContent = "pause";
   } else {
     audio.pause();
-    playBtn.textContent = "▶";
+    playBtn.textContent = "play_arrow";
   }
 };
 backBtn.onclick = () => audio.currentTime = Math.max(0, audio.currentTime - 5);
 forwardBtn.onclick = () => audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
 seek.oninput = () => audio.currentTime = seek.value;
 
-// Volume + icon
 volume.oninput = () => {
   audio.volume = volume.value;
-  if (volume.value == 0) volIcon.textContent = "🔇";
-  else if (volume.value < 0.5) volIcon.textContent = "🔉";
-  else volIcon.textContent = "🔊";
+  if (volume.value == 0) volIcon.textContent = "volume_off";
+  else if (volume.value < 0.5) volIcon.textContent = "volume_down";
+  else volIcon.textContent = "volume_up";
 };
 
-// Speed control
 speedBtn.onclick = () => {
   const speeds = [1, 1.25, 1.5, 2];
   let idx = speeds.indexOf(audio.playbackRate);
@@ -124,7 +115,6 @@ speedBtn.onclick = () => {
   speedBtn.textContent = audio.playbackRate + "x";
 };
 
-// Time format
 function updateTime() {
   const cur = formatTime(audio.currentTime);
   const total = formatTime(audio.duration);
@@ -137,7 +127,6 @@ function formatTime(sec) {
   return `${m}:${s}`;
 }
 
-// Waveform
 function drawWaveform() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = "#d0bcff";
@@ -153,7 +142,6 @@ function drawWaveform() {
   ctx.stroke();
 }
 
-// Menu actions
 infoBtn.onclick = () => {
   const sizeKB = Math.round(rec.blob.size / 1024);
   const dur = formatTime(audio.duration);
