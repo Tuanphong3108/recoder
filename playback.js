@@ -200,3 +200,25 @@ deleteBtn.onclick = async () => {
     location.href = "index.html";
   }
 };
+
+// ========== Ripple effect ==========
+document.querySelectorAll("button, .chip").forEach(btn => {
+  btn.addEventListener("click", function (e) {
+    const circle = document.createElement("span");
+    const diameter = Math.max(this.clientWidth, this.clientHeight);
+    const radius = diameter / 2;
+
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${e.clientX - this.getBoundingClientRect().left - radius}px`;
+    circle.style.top = `${e.clientY - this.getBoundingClientRect().top - radius}px`;
+    circle.classList.add("ripple");
+
+    // custom color accent
+    circle.style.background = "rgba(208, 188, 255, 0.35)";
+
+    const ripple = this.querySelector(".ripple");
+    if (ripple) ripple.remove();
+
+    this.appendChild(circle);
+  });
+});
