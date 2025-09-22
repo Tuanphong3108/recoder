@@ -8,13 +8,14 @@
   <link rel="icon" type="image/png" href="icon.png" sizes="256x256">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1c1b1f">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet" />
 </head>
 <body>
   <div id="app">
     <header>
-      <a href="index.html">← Trở về</a>
+      <a href="index.html" class="material-symbols-rounded">arrow_back</a>
       <h2 id="recName">Playback</h2>
-      <button id="menuBtn">⋮</button>
+      <button id="menuBtn" class="material-symbols-rounded">more_vert</button>
     </header>
 
     <main>
@@ -22,28 +23,28 @@
       <div id="playbackTime">00:00 / 00:00</div>
 
       <div class="controls">
-        <button id="btnBack">⏪</button>
-        <button id="btnPlay">▶</button>
-        <button id="btnForward">⏩</button>
+        <button id="btnBack" class="material-symbols-rounded">replay_5</button>
+        <button id="btnPlay" class="material-symbols-rounded">play_arrow</button>
+        <button id="btnForward" class="material-symbols-rounded">forward_5</button>
 
         <input type="range" id="seek" min="0" max="100" value="0">
 
         <!-- Volume control -->
         <div class="volume-control">
-          <span id="volIcon">🔊</span>
+          <span id="volIcon" class="material-symbols-rounded">volume_up</span>
           <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
         </div>
 
-        <button id="speed">1x</button>
+        <button id="speed" class="chip">1x</button>
       </div>
     </main>
   </div>
 
   <!-- Menu 3 chấm -->
-  <div id="menu" class="hidden">
-    <button id="infoBtn">ℹ Thông tin</button>
-    <button id="exportBtn">⬇ Xuất</button>
-    <button id="deleteBtn" class="danger">🗑 Xóa</button>
+  <div id="menu" class="hidden menu-card">
+    <button id="infoBtn"><span class="material-symbols-rounded">info</span> Thông tin</button>
+    <button id="exportBtn"><span class="material-symbols-rounded">download</span> Xuất</button>
+    <button id="deleteBtn" class="danger"><span class="material-symbols-rounded">delete</span> Xóa</button>
   </div>
 
   <!-- Modal Info -->
@@ -51,7 +52,7 @@
     <div class="modal-card">
       <h3>Thông tin bản ghi</h3>
       <div id="infoContent"></div>
-      <button id="closeInfo">Đóng</button>
+      <button id="closeInfo" class="chip">Đóng</button>
     </div>
   </div>
 
