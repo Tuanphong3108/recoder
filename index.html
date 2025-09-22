@@ -5,11 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Recorder</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="icon.png" sizes="256x256">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1c1b1f">
 </head>
 <body>
   <!-- Splash Screen -->
   <div id="splash">
-    <img src="icon.png" alt="Recoder Logo" width="128" height="128">
+    <img src="icon.png" alt="Recorder Logo" width="128" height="128">
     <p>Đang khởi động...</p>
   </div>
 
@@ -23,7 +26,6 @@
       <div id="controls">
         <button id="btnRecord">⏺</button>
         <button id="btnPause" disabled>⏸</button>
-        <button id="btnStop" disabled>⏹</button>
         <span id="timer">00:00.0</span>
       </div>
 
@@ -32,7 +34,12 @@
     </main>
   </div>
 
-  <!-- load script cuối body để chắc chắn DOM đã có -->
   <script src="script.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js")
+        .catch(err => console.error("SW failed:", err));
+    }
+  </script>
 </body>
 </html>
