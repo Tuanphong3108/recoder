@@ -1,36 +1,30 @@
 const CACHE_NAME = "recorder-cache-v1";
-const urlsToCache = [
-  "/",
-  "/index.html",
+const ASSETS = [
+  "index.html",
+  "playback.html",
+  "style.css",
+  "script.js",
+  "playback.js",
   "icon.png",
-  "/style.css",
-  "/script.js",
-  "/manifest.json"
+  "manifest.json"
 ];
 
-// Cài đặt service worker
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
+self.addEventListener("install", e => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
 });
 
-// Kích hoạt service worker (xóa cache cũ nếu có)
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) =>
-      Promise.all(
-        cacheNames.map((name) => {
-          if (name !== CACHE_NAME) return caches.delete(name);
-        })
-      )
+self.addEventListener("activate", e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
     )
   );
 });
 
-// Intercept request và phục vụ từ cache nếu offline
-self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    caches.match(event.request).then((resp) => resp || fetch(event.request))
+self.addEventListener("fetch", e => {
+  e.respondWith(
+    caches.match(e.request).then(res => res || fetch(e.request))
   );
 });
