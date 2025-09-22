@@ -1,4 +1,4 @@
-// === IndexedDB setup ===
+// === DB Setup ===
 let db;
 const DB_NAME = "recorder-db";
 const STORE_NAME = "recordings";
@@ -7,7 +7,9 @@ function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, 1);
     req.onupgradeneeded = e => {
-      e.target.result.createObjectStore(STORE_NAME, { keyPath: "id" });
+      if (!e.target.result.objectStoreNames.contains(STORE_NAME)) {
+        e.target.result.createObjectStore(STORE_NAME, { keyPath: "id" });
+      }
     };
     req.onsuccess = e => { db = e.target.result; resolve(); };
     req.onerror = reject;
@@ -49,14 +51,23 @@ function deleteRecording(id) {
 // === Elements ===
 const splash = document.getElementById("splash");
 const recordBtn = document.getElementById("recordBtn");
+const recordControls = document.getElementById("recordControls");
+const pauseBtn = document.getElementById("pauseBtn");
 const stopBtn = document.getElementById("stopBtn");
+const recordTime = document.getElementById("recordTime");
 const listEl = document.getElementById("recordings");
 
 const infoModal = document.getElementById("infoModal");
 const infoContent = document.getElementById("infoContent");
 const closeInfo = document.getElementById("closeInfo");
 
-let mediaRecorder, chunks = [], isRecording = false;
+// === Recording state ===
+let mediaRecorder, chunks = [];
+let isRecording = false;
+let isPaused = false;
+let startTimestamp = 0;
+let elapsedBeforePause = 0;
+let timerInterval;
 
 // === Init ===
 async function init() {
@@ -71,6 +82,41 @@ async function init() {
   renderList();
 }
 init();
+
+// === Timer utils ===
+function formatTime(ms) {
+  const totalSec = Math.floor(ms / 1000);
+  const min = String(Math.floor(totalSec / 60)).padStart(2, "0");
+  const sec = String(totalSec % 60).padStart(2, "0");
+  const dec = Math.floor((ms % 1000) / 100);
+  return `${min}:${sec}.${dec}`;
+}
+function startTimer() {
+  startTimestamp = performance.now();
+  timerInterval = setInterval(() => {
+    const now = performance.now();
+    const elapsed = elapsedBeforePause + (now - startTimestamp);
+    recordTime.textContent = formatTime(elapsed);
+  }, 100);
+}
+function pauseTimer() {
+  clearInterval(timerInterval);
+  elapsedBeforePause += performance.now() - startTimestamp;
+}
+function resumeTimer() {
+  startTimestamp = performance.now();
+  timerInterval = setInterval(() => {
+    const now = performance.now();
+    const elapsed = elapsedBeforePause + (now - startTimestamp);
+    recordTime.textContent = formatTime(elapsed);
+  }, 100);
+}
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  elapsedBeforePause = 0;
+  recordTime.textContent = "00:00.0";
+}
 
 // === Recording ===
 recordBtn.onclick = async () => {
@@ -95,13 +141,35 @@ recordBtn.onclick = async () => {
 
   mediaRecorder.start();
   isRecording = true;
-  recordBtn.textContent = "pause";
+  recordBtn.classList.add("hidden");
+  recordControls.classList.remove("hidden");
+  pauseBtn.textContent = "pause";
+  isPaused = false;
+  startTimer();
 };
+
+pauseBtn.onclick = () => {
+  if (!isRecording) return;
+  if (!isPaused) {
+    mediaRecorder.pause();
+    pauseTimer();
+    pauseBtn.textContent = "play_arrow"; // resume
+    isPaused = true;
+  } else {
+    mediaRecorder.resume();
+    resumeTimer();
+    pauseBtn.textContent = "pause";
+    isPaused = false;
+  }
+};
+
 stopBtn.onclick = () => {
   if (!isRecording) return;
   mediaRecorder.stop();
   isRecording = false;
-  recordBtn.textContent = "mic";
+  stopTimer();
+  recordControls.classList.add("hidden");
+  recordBtn.classList.remove("hidden");
 };
 
 // === Render list ===
@@ -137,14 +205,12 @@ async function renderList() {
       <button class="delete danger"><span class="material-symbols-rounded">delete</span> Xóa</button>
     `;
 
-    // Click vào card (trừ menu) => playback
     card.onclick = (e) => {
       if (e.target !== menuBtn && !menu.contains(e.target)) {
         location.href = `playback.html?id=${rec.id}`;
       }
     };
 
-    // Toggle menu
     menuBtn.onclick = (e) => {
       e.stopPropagation();
       document.querySelectorAll(".menu-card").forEach(m => m.classList.remove("show"));
@@ -156,7 +222,6 @@ async function renderList() {
       }
     });
 
-    // Menu actions
     menu.querySelector(".info").onclick = async (e) => {
       e.stopPropagation();
       const r = await getRecording(rec.id);
@@ -191,20 +256,20 @@ async function renderList() {
   });
 }
 
-// === Modal close ===
+// === Modal ===
 closeInfo.onclick = () => infoModal.classList.add("hidden");
 
-// === Ripple effect ===
+// === Ripple ===
 document.addEventListener("click", (e) => {
   const btn = e.target.closest("button, .chip");
   if (!btn) return;
-
   const circle = document.createElement("span");
-  const diameter = Math.max(btn.clientWidth, btn.clientHeight);
-  const radius = diameter / 2;
-  circle.style.width = circle.style.height = `${diameter}px`;
-  circle.style.left = `${e.clientX - btn.getBoundingClientRect().left - radius}px`;
-  circle.style.top = `${e.clientY - btn.getBoundingClientRect().top - radius}px`;
+  const d = Math.max(btn.clientWidth, btn.clientHeight);
+  const r = d / 2;
+  circle.style.width = circle.style.height = `${d}px`;
+  const rect = btn.getBoundingClientRect();
+  circle.style.left = `${e.clientX - rect.left - r}px`;
+  circle.style.top = `${e.clientY - rect.top - r}px`;
   circle.classList.add("ripple");
   circle.style.background = "rgba(208, 188, 255, 0.35)";
   const ripple = btn.querySelector(".ripple");
