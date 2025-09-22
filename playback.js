@@ -1,15 +1,12 @@
+// === IndexedDB helpers (giữ nguyên như trước) ===
 let db;
 const DB_NAME = "recorder-db";
 const STORE_NAME = "recordings";
 
-// ========== IndexedDB ==========
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, 1);
-    req.onsuccess = e => {
-      db = e.target.result;
-      resolve();
-    };
+    req.onsuccess = e => { db = e.target.result; resolve(); };
     req.onerror = reject;
   });
 }
@@ -30,7 +27,7 @@ function deleteRecording(id) {
   });
 }
 
-// ========== Elements ==========
+// === Elements ===
 const audio = new Audio();
 
 const playBtn = document.getElementById("btnPlay");
@@ -61,11 +58,11 @@ const ctx = canvas.getContext("2d");
 
 let rec, recId, blobUrl;
 
-// ========== Get URL param ==========
+// === Get URL param ===
 const params = new URLSearchParams(location.search);
 recId = params.get("id");
 
-// ========== Init ==========
+// === Init ===
 async function init() {
   await openDB();
   rec = await getRecording(recId);
@@ -77,12 +74,10 @@ async function init() {
   }
 
   recNameEl.textContent = rec.name;
-
   const blob = rec.blob;
   blobUrl = URL.createObjectURL(blob);
   audio.src = blobUrl;
 
-  // auto play khi mở
   audio.play();
   playBtn.textContent = "pause";
 
@@ -98,28 +93,19 @@ async function init() {
 }
 init();
 
-// ========== Controls ==========
-// ... giữ nguyên phần trên như bản full trước đó ...
-
-// Controls
+// === Controls ===
 playBtn.onclick = () => {
   if (audio.paused) {
     audio.play();
-    playBtn.textContent = "pause"; // Material icon
+    playBtn.textContent = "pause";
   } else {
     audio.pause();
-    playBtn.textContent = "play_arrow"; // Material icon
+    playBtn.textContent = "play_arrow";
   }
 };
-
-
-backBtn.onclick = () =>
-  (audio.currentTime = Math.max(0, audio.currentTime - 5));
-
-forwardBtn.onclick = () =>
-  (audio.currentTime = Math.min(audio.duration, audio.currentTime + 5));
-
-seek.oninput = () => (audio.currentTime = seek.value);
+backBtn.onclick = () => audio.currentTime = Math.max(0, audio.currentTime - 5);
+forwardBtn.onclick = () => audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
+seek.oninput = () => audio.currentTime = seek.value;
 
 // Volume
 volume.oninput = () => {
@@ -137,7 +123,7 @@ speedBtn.onclick = () => {
   speedBtn.textContent = audio.playbackRate + "x";
 };
 
-// ========== Time ==========
+// Time
 function updateTime() {
   const cur = formatTime(audio.currentTime);
   const total = formatTime(audio.duration);
@@ -150,7 +136,7 @@ function formatTime(sec) {
   return `${m}:${s}`;
 }
 
-// ========== Waveform ==========
+// Waveform
 function drawWaveform() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = "#d0bcff";
@@ -166,18 +152,17 @@ function drawWaveform() {
   ctx.stroke();
 }
 
-// ========== Menu ==========
+// === Menu toggle ===
 menuBtn.onclick = () => {
   menu.classList.toggle("show");
 };
-
 window.onclick = (e) => {
   if (!menu.contains(e.target) && e.target !== menuBtn) {
     menu.classList.remove("show");
   }
 };
 
-// ========== Menu Actions ==========
+// === Menu actions ===
 infoBtn.onclick = () => {
   const sizeKB = Math.round(rec.blob.size / 1024);
   const dur = formatTime(audio.duration);
@@ -197,7 +182,6 @@ exportBtn.onclick = () => {
   a.download = rec.name.replace(/\s+/g, "_") + ".webm";
   a.click();
 };
-
 deleteBtn.onclick = async () => {
   if (confirm("Xóa bản ghi này?")) {
     await deleteRecording(rec.id);
@@ -205,24 +189,19 @@ deleteBtn.onclick = async () => {
   }
 };
 
-// ========== Ripple effect ==========
+// === Ripple effect ===
 document.querySelectorAll("button, .chip").forEach(btn => {
   btn.addEventListener("click", function (e) {
     const circle = document.createElement("span");
     const diameter = Math.max(this.clientWidth, this.clientHeight);
     const radius = diameter / 2;
-
     circle.style.width = circle.style.height = `${diameter}px`;
     circle.style.left = `${e.clientX - this.getBoundingClientRect().left - radius}px`;
     circle.style.top = `${e.clientY - this.getBoundingClientRect().top - radius}px`;
     circle.classList.add("ripple");
-
-    // custom color accent
     circle.style.background = "rgba(208, 188, 255, 0.35)";
-
     const ripple = this.querySelector(".ripple");
     if (ripple) ripple.remove();
-
     this.appendChild(circle);
   });
 });
