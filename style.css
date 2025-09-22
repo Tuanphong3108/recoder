@@ -230,3 +230,44 @@ canvas {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* Controls */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+/* Seekbar expressive */
+#seek {
+  flex: 1;
+  height: 6px;
+  border-radius: 4px;
+  accent-color: #d0bcff; /* M3 accent */
+  cursor: pointer;
+}
+#seek:hover {
+  accent-color: #eaddff;
+}
+
+/* Volume control expressive */
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#volIcon {
+  font-size: 1.2rem;
+  color: #e6e1e5;
+}
+#volume {
+  width: 80px;
+  height: 6px;
+  border-radius: 4px;
+  accent-color: #d0bcff;
+  cursor: pointer;
+}
+#volume:hover {
+  accent-color: #eaddff;
+}
