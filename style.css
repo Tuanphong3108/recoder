@@ -1,185 +1,209 @@
-/* Base */
-body {
-  margin: 0;
-  font-family: "Roboto", sans-serif;
-  background: #1c1b1f;
-  color: #e6e1e5;
+/* ===========================
+   Global (Material 3 - dark)
+   =========================== */
+:root{
+  --bg:#1c1b1f;
+  --surface:#2b2930;
+  --surface-2:#3b383f;
+  --on-surface:#e6e1e5;
+  --muted:#cac4d0;
+  --accent:#d0bcff;
+  --danger:#f2b8b5;
+  --ripple: rgba(208,188,255,0.35);
 }
 
-/* Splash */
-#splash {
-  position: fixed;
-  inset: 0;
-  background: #1c1b1f;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  z-index: 100;
-  transition: opacity 0.5s;
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Roboto, "Helvetica Neue", Arial, sans-serif;background:var(--bg);color:var(--on-surface);-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+
+/* Hidden helper */
+.hidden{display:none}
+
+/* ===========================
+   Header
+   =========================== */
+.header {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 16px;
+  background:var(--surface);
+  box-shadow:0 1px 0 rgba(0,0,0,0.4);
 }
-#splash.fade-out {
-  opacity: 0;
-  pointer-events: none;
+.header .left {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.header .title {
+  font-size:1rem;
+  font-weight:500;
+}
+.header .spacer{flex:1}
+.header button.icon-btn, .header a.icon-btn {
+  background:none;border:none;color:var(--on-surface);font-size:22px;padding:8px;border-radius:50%;cursor:pointer;
+}
+.header button.icon-btn:hover{background:var(--surface-2)}
+
+/* ===========================
+   Main layout
+   =========================== */
+.container{
+  padding:18px;
 }
 
-/* Header */
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: #2b2930;
-}
-header h1 {
-  margin: 0;
-  font-size: 1.4rem;
-}
-.header-actions {
-  display: flex;
-  gap: 8px;
-}
-.header-actions button {
-  background: #2b2930;
-  border: none;
-  border-radius: 50%;
-  color: #e6e1e5;
-  font-size: 28px;
-  padding: 8px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.header-actions button:hover {
-  background: #3b383f;
+/* Waveform card area */
+.wave-card{
+  background:transparent;
+  margin-bottom:8px;
 }
 
-/* Recordings list */
-.recordings-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-}
-.recording-card {
-  background: #2b2930;
-  border-radius: 16px;
-  padding: 12px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background 0.2s;
-  position: relative;
-  cursor: pointer;
-}
-.recording-card:hover {
-  background: #3b383f;
-}
-.recording-info {
-  display: flex;
-  flex-direction: column;
-}
-.recording-name {
-  font-size: 1rem;
-  margin-bottom: 4px;
-}
-.recording-meta {
-  font-size: 0.85rem;
-  color: #cac4d0;
+/* Canvas wrapper */
+.wave-wrapper{
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+  border-radius:12px;
+  padding:12px 16px;
+  margin-bottom:12px;
 }
 
-/* Menu button */
-.recording-menu {
-  background: none;
-  border: none;
-  color: #e6e1e5;
-  font-size: 24px;
-  cursor: pointer;
-  border-radius: 50%;
-  padding: 6px;
-  transition: background 0.2s;
-}
-.recording-menu:hover {
-  background: #3b383f;
+/* Canvas style */
+#waveform{
+  width:100%;
+  height:120px;
+  display:block;
+  border-radius:10px;
+  background:transparent;
 }
 
-/* Menu card */
-.menu-card {
-  position: absolute;
-  top: 44px;
-  right: 12px;
-  background: #2b2930;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  opacity: 0;
-  transform: translateY(-10px);
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  z-index: 10;
-}
-.menu-card.show {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-.menu-card button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: none;
-  border: none;
-  color: #e6e1e5;
-  padding: 12px 16px;
-  text-align: left;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.menu-card button:hover {
-  background: #3b383f;
-}
-button.danger {
-  color: #f2b8b5;
+/* Playback time */
+#playbackTime{
+  font-family:monospace;
+  font-size:0.9rem;
+  color:var(--muted);
+  padding:6px 0 12px 4px;
 }
 
-/* Modal */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.modal-card {
-  background: #2b2930;
-  padding: 20px;
-  border-radius: 16px;
-  max-width: 300px;
-  color: #e6e1e5;
-}
-.hidden {
-  display: none;
+/* Controls area */
+.controls{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:8px 0 24px 0;
+  flex-wrap:wrap;
 }
 
-/* Ripple effect */
-button, .chip {
-  position: relative;
-  overflow: hidden;
+/* Circular control buttons (M3 expressive) */
+.ctrl-btn{
+  background:var(--surface);
+  border:none;
+  color:var(--on-surface);
+  width:56px;
+  height:56px;
+  border-radius:28px;
+  display:inline-grid;place-items:center;
+  font-size:22px;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,0,0,0.5);
+  transition:transform .12s ease, background .12s;
 }
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  transform: scale(0);
-  animation: ripple 600ms linear;
-  background: rgba(208, 188, 255, 0.35);
-  pointer-events: none;
+.ctrl-btn:active{transform:scale(.98)}
+.ctrl-btn:hover{background:var(--surface-2)}
+
+/* Play/Pause primary (bigger) */
+#btnPlay{ width:72px; height:72px; border-radius:36px; font-size:28px; background:linear-gradient(180deg,var(--accent), #c7b2ff); color:#24123b }
+
+/* Seekbar - expressive */
+.range {
+  -webkit-appearance:none;
+  appearance:none;
+  height:6px;
+  background:#49454f;
+  border-radius:8px;
+  outline:none;
 }
-@keyframes ripple {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
+.range::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 0 6px rgba(208,188,255,0.14);
+  transition:box-shadow .12s, transform .12s;
+}
+.range:active::-webkit-slider-thumb{ transform:scale(1.05) }
+
+/* Seek container to allow controlled width */
+.seek-wrap{flex:1; min-width:220px; max-width:680px; display:flex; align-items:center; gap:8px;}
+
+/* Volume control (short) */
+.volume-control{display:flex; align-items:center; gap:8px}
+#volIcon{font-size:18px; color:var(--on-surface); background:transparent; padding:6px; border-radius:8px}
+#volume{ width:110px; height:6px; border-radius:8px; background:#49454f;}
+
+/* Speed chip */
+.chip{
+  background:var(--surface);
+  border-radius:16px;
+  padding:8px 10px;
+  color:var(--on-surface);
+  border:none;
+  cursor:pointer;
+  transition:background .12s;
+}
+.chip:hover{ background:var(--surface-2) }
+
+/* ===========================
+   Menu (3-dot) popup
+   =========================== */
+.menu-card{
+  position:absolute;
+  top:48px;
+  right:0;
+  min-width:160px;
+  background:var(--surface);
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+  display:flex;
+  flex-direction:column;
+  opacity:0;
+  transform:translateY(-8px);
+  pointer-events:none;
+  transition:opacity .16s ease, transform .16s ease;
+  z-index:40;
+}
+.menu-card.show{ opacity:1; transform:translateY(0); pointer-events:auto }
+.menu-card button{ display:flex; gap:10px; align-items:center;
+  padding:12px 14px; background:none; border:none; color:var(--on-surface); cursor:pointer; text-align:left; position:relative; overflow:hidden}
+.menu-card button:hover{ background:var(--surface-2) }
+.menu-card .danger{ color:var(--danger) }
+
+/* ===========================
+   Info modal
+   =========================== */
+.modal{
+  position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.5); z-index:60;
+}
+.modal-card{
+  background:var(--surface); border-radius:14px; padding:18px; width:320px; color:var(--on-surface);
+  box-shadow:0 20px 60px rgba(0,0,0,0.7);
+}
+.modal-card h3{ margin:0 0 8px 0; color:var(--accent) }
+.modal-card p{ margin:6px 0; color:var(--muted) }
+
+/* ===========================
+   Ripple effect (buttons / menu items)
+   =========================== */
+button, .chip{
+  position:relative; overflow:hidden;
+}
+.ripple{
+  position:absolute; border-radius:50%; transform:scale(0);
+  animation:ripple 600ms linear; background:var(--ripple); pointer-events:none;
+}
+@keyframes ripple{ to{ transform:scale(4); opacity:0 } }
+
+/* small responsiveness */
+@media (max-width:720px){
+  #waveform{ height:90px }
+  .seek-wrap{ max-width:320px }
+  #btnPlay{ width:64px; height:64px; font-size:24px }
 }
