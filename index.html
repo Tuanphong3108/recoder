@@ -1,54 +1,49 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Recorder</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/png" href="icon.png" sizes="256x256">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1c1b1f">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="icon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Material+Symbols+Rounded" rel="stylesheet" />
 </head>
 <body>
-  <div id="app">
-    <!-- Splash khi chờ quyền mic -->
-    <div id="splash">
-      <img src="icon.png" alt="Recorder Icon" width="96">
-      <p>Đang khởi động...</p>
-    </div>
-
-    <header>
-      <h1>Recorder</h1>
-      <div class="header-actions">
-        <button id="recordBtn" class="material-symbols-rounded">mic</button>
-        <button id="stopBtn" class="material-symbols-rounded">stop</button>
-      </div>
-    </header>
-
-    <main>
-      <h2>Danh sách bản ghi</h2>
-      <div id="recordings" class="recordings-list">
-        <!-- Render bằng script.js -->
-      </div>
-    </main>
+  <div id="splash">
+    <img src="icon.png" width="96" height="96" alt="logo" />
+    <span>Đang khởi động...</span>
   </div>
 
-  <!-- Modal Info -->
+  <header>
+    <h1>Recorder</h1>
+    <div class="header-actions">
+      <button id="recordBtn" class="material-symbols-rounded">mic</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Timer -->
+    <div id="recordTime" class="record-timer">00:00.0</div>
+
+    <!-- Record controls -->
+    <div id="recordControls" class="controls hidden">
+      <button id="pauseBtn" class="ctrl-btn material-symbols-rounded" title="Tạm dừng">pause</button>
+      <button id="stopBtn" class="ctrl-btn material-symbols-rounded danger" title="Dừng">stop</button>
+    </div>
+
+    <!-- Recordings list -->
+    <section class="recordings-list" id="recordings"></section>
+  </main>
+
+  <!-- Info modal -->
   <div id="infoModal" class="modal hidden">
     <div class="modal-card">
-      <h3>Thông tin bản ghi</h3>
+      <h3>Thông tin</h3>
       <div id="infoContent"></div>
       <button id="closeInfo" class="chip">Đóng</button>
     </div>
   </div>
 
   <script src="script.js"></script>
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js")
-        .catch(err => console.error("SW failed:", err));
-    }
-  </script>
 </body>
 </html>
