@@ -207,3 +207,36 @@ button, .chip{
   .seek-wrap{ max-width:320px }
   #btnPlay{ width:64px; height:64px; font-size:24px }
 }
+
+/* --- Timer --- */
+.record-timer {
+  text-align: center;
+  font-family: monospace;
+  font-size: 2rem;
+  color: #d0bcff; /* accent M3 */
+  margin: 16px 0;
+}
+
+/* --- Controls --- */
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+.ctrl-btn {
+  background: #2b2930;
+  border: none;
+  border-radius: 50%;
+  color: #e6e1e5;
+  font-size: 28px;
+  padding: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ctrl-btn:hover {
+  background: #3b383f;
+}
+.ctrl-btn.danger {
+  color: #f2b8b5;
+}
