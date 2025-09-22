@@ -116,7 +116,7 @@ recordBtn.onclick = async () => {
 
   mediaRecorder.start();
   isRecording = true;
-  recordBtn.textContent = "pause"; // có thể làm pause nếu muốn
+  recordBtn.textContent = "pause";
 };
 stopBtn.onclick = () => {
   if (!isRecording) return;
@@ -134,12 +134,20 @@ async function renderList() {
     const card = document.createElement("div");
     card.className = "recording-card";
 
-    const name = document.createElement("span");
+    const info = document.createElement("div");
+    info.className = "recording-info";
+    const name = document.createElement("div");
+    name.className = "recording-name";
     name.textContent = rec.name;
-    name.onclick = () => location.href = `playback.html?id=${rec.id}`;
+    const meta = document.createElement("div");
+    meta.className = "recording-meta";
+    meta.textContent = `${new Date(rec.created).toLocaleString()}`;
+
+    info.appendChild(name);
+    info.appendChild(meta);
 
     const menuBtn = document.createElement("button");
-    menuBtn.className = "material-symbols-rounded";
+    menuBtn.className = "material-symbols-rounded recording-menu";
     menuBtn.textContent = "more_vert";
 
     const menu = document.createElement("div");
@@ -150,6 +158,14 @@ async function renderList() {
       <button class="delete danger"><span class="material-symbols-rounded">delete</span> Xóa</button>
     `;
 
+    // Click vào card (trừ menu) => playback
+    card.onclick = (e) => {
+      if (e.target !== menuBtn && !menu.contains(e.target)) {
+        location.href = `playback.html?id=${rec.id}`;
+      }
+    };
+
+    // Toggle menu
     menuBtn.onclick = (e) => {
       e.stopPropagation();
       document.querySelectorAll(".menu-card").forEach(m => m.classList.remove("show"));
@@ -161,8 +177,9 @@ async function renderList() {
       }
     });
 
-    // Actions
-    menu.querySelector(".info").onclick = async () => {
+    // Menu actions
+    menu.querySelector(".info").onclick = async (e) => {
+      e.stopPropagation();
       const r = await getRecording(rec.id);
       const sizeKB = Math.round(r.blob.size / 1024);
       infoContent.innerHTML = `
@@ -173,20 +190,22 @@ async function renderList() {
       `;
       infoModal.classList.remove("hidden");
     };
-    menu.querySelector(".export").onclick = () => {
+    menu.querySelector(".export").onclick = (e) => {
+      e.stopPropagation();
       const a = document.createElement("a");
       a.href = URL.createObjectURL(rec.blob);
       a.download = rec.name.replace(/\s+/g, "_") + ".webm";
       a.click();
     };
-    menu.querySelector(".delete").onclick = async () => {
+    menu.querySelector(".delete").onclick = async (e) => {
+      e.stopPropagation();
       if (confirm("Xóa bản ghi này?")) {
         await deleteRecording(rec.id);
         renderList();
       }
     };
 
-    card.appendChild(name);
+    card.appendChild(info);
     card.appendChild(menuBtn);
     card.appendChild(menu);
     listEl.appendChild(card);
