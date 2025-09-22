@@ -1,24 +1,3 @@
-// ================== Splash Screen ==================
-async function initSplash() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    stream.getTracks().forEach(track => track.stop());
-
-    document.getElementById("splash").classList.add("hidden");
-    document.getElementById("app").classList.remove("hidden");
-  } catch (e) {
-    console.warn("Mic access denied:", e);
-    alert("Ứng dụng cần quyền microphone để ghi âm!");
-    document.getElementById("splash").classList.add("hidden");
-    document.getElementById("app").classList.remove("hidden");
-  }
-}
-
-window.onload = () => {
-  initSplash();
-  init(); // khởi tạo DB sau khi DOM ready
-};
-
 // === IndexedDB setup ===
 let db;
 const DB_NAME = "recorder-db";
