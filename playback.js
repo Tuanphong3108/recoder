@@ -99,15 +99,19 @@ async function init() {
 init();
 
 // ========== Controls ==========
+// ... giữ nguyên phần trên như bản full trước đó ...
+
+// Controls
 playBtn.onclick = () => {
   if (audio.paused) {
     audio.play();
-    playBtn.textContent = "pause";
+    playBtn.textContent = "pause"; // Material icon
   } else {
     audio.pause();
-    playBtn.textContent = "play_arrow";
+    playBtn.textContent = "play_arrow"; // Material icon
   }
 };
+
 
 backBtn.onclick = () =>
   (audio.currentTime = Math.max(0, audio.currentTime - 5));
