@@ -33,6 +33,7 @@ const backBtn = document.getElementById("btnBack");
 const forwardBtn = document.getElementById("btnForward");
 const seek = document.getElementById("seek");
 const volume = document.getElementById("volume");
+const volIcon = document.getElementById("volIcon");
 const speedBtn = document.getElementById("speed");
 const timeEl = document.getElementById("playbackTime");
 const recNameEl = document.getElementById("recName");
@@ -78,6 +79,7 @@ async function init() {
 
   // Auto play
   audio.play();
+  playBtn.textContent = "⏸";
 
   // update seek & time
   audio.onloadedmetadata = () => {
@@ -105,7 +107,16 @@ playBtn.onclick = () => {
 backBtn.onclick = () => audio.currentTime = Math.max(0, audio.currentTime - 5);
 forwardBtn.onclick = () => audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
 seek.oninput = () => audio.currentTime = seek.value;
-volume.oninput = () => audio.volume = volume.value;
+
+// Volume + icon
+volume.oninput = () => {
+  audio.volume = volume.value;
+  if (volume.value == 0) volIcon.textContent = "🔇";
+  else if (volume.value < 0.5) volIcon.textContent = "🔉";
+  else volIcon.textContent = "🔊";
+};
+
+// Speed control
 speedBtn.onclick = () => {
   const speeds = [1, 1.25, 1.5, 2];
   let idx = speeds.indexOf(audio.playbackRate);
