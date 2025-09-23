@@ -4,43 +4,55 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Recorder</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="icon.png" />
+  <link rel="icon" type="image/png" href="icon.png" />
+  <link href="style.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Material+Symbols+Rounded" rel="stylesheet" />
 </head>
 <body>
+  <!-- Splash -->
   <div id="splash">
-    <img src="icon.png" width="96" height="96" alt="logo" />
-    <span>Đang khởi động...</span>
+    <div class="splash-content">
+      <span class="material-symbols-rounded splash-icon">mic</span>
+      <p>Đang khởi động...</p>
+    </div>
   </div>
 
+  <!-- Main -->
   <header>
     <h1>Recorder</h1>
-    <div class="header-actions">
-      <button id="recordBtn" class="material-symbols-rounded">mic</button>
+    <button id="menuBtn" class="icon-btn">
+      <span class="material-symbols-rounded">more_vert</span>
+    </button>
+    <div id="menu" class="menu hidden">
+      <button id="infoBtn">Thông tin</button>
+      <button id="exportBtn">Xuất</button>
     </div>
   </header>
 
   <main>
-    <!-- Timer -->
-    <div id="recordTime" class="record-timer">00:00.0</div>
-
-    <!-- Record controls -->
-    <div id="recordControls" class="controls hidden">
-      <button id="pauseBtn" class="ctrl-btn material-symbols-rounded" title="Tạm dừng">pause</button>
-      <button id="stopBtn" class="ctrl-btn material-symbols-rounded danger" title="Dừng">stop</button>
+    <div id="timer">00:00.0</div>
+    <div class="controls">
+      <button id="pauseBtn" class="icon-btn hidden">
+        <span class="material-symbols-rounded">pause</span>
+      </button>
+      <button id="resumeBtn" class="icon-btn hidden">
+        <span class="material-symbols-rounded">play_arrow</span>
+      </button>
+      <button id="stopBtn" class="icon-btn hidden">
+        <span class="material-symbols-rounded">stop</span>
+      </button>
+      <button id="recordBtn" class="icon-btn">
+        <span class="material-symbols-rounded">mic</span>
+      </button>
     </div>
-
-    <!-- Recordings list -->
-    <section class="recordings-list" id="recordings"></section>
   </main>
 
-  <!-- Info modal -->
-  <div id="infoModal" class="modal hidden">
-    <div class="modal-card">
-      <h3>Thông tin</h3>
-      <div id="infoContent"></div>
-      <button id="closeInfo" class="chip">Đóng</button>
+  <!-- Info Dialog -->
+  <div id="infoDialog" class="dialog hidden">
+    <div class="dialog-content">
+      <h2>Thông tin</h2>
+      <p>Ứng dụng ghi âm Web Recorder (Material 3).</p>
+      <button id="closeInfo">Đóng</button>
     </div>
   </div>
 
